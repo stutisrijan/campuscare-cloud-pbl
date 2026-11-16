@@ -1,8 +1,10 @@
-# AWS deployment gate - do not execute blindly
+# AWS deployment record and checks - do not redeploy blindly
 
-Hard requirement: free resources only, no use of credits as payment. The presence of a credit balance is not permission to spend it.
+Updated user-approved scope: at most$100 existing AWS credits; no personal-money charges, paid-plan upgrade or EC2. Current Free Plan retained. This is not an enforced$100 monetary cap.
 
-Before creating resources:
+Verified16November2026 in account573705805509, ap-south-1: API health, real persistence/queue routing, secret-protected tracking and actual browser admin resolution passed. Stop schedule campuscare-pbl-stop24h is enabled for17November2026 18:00IST /12:30UTC. Tested stop sets API and worker reserved concurrency0; execution was restored for demonstration. Stop preserves data/resources. Do not rerun deploy_aws.py without reviewing expiry.
+
+Configuration checks for any future deployment:
 1. Verify intended account 22803011@mail.jiit.ac.in and actual account ID.
 2. Inspect account plan, account expiry, service access and current Free Tier usage. Check whether quotas are shared with existing workloads.
 3. Verify current regional pricing for every component, including logs, data transfer and encryption options. Do not equate no cash invoice with no credits consumed.
@@ -14,7 +16,7 @@ Before creating resources:
 9. Set an application admin token through a secure process, not a committed literal.
 10. Verify the final resource configuration against permission before creating it. Cost alerts are only alerts, not hard caps.
 
-After deployment, test submission, real SQS processing, DynamoDB persistence, secret-protected tracking and admin updates. Capture actual AWS evidence. Verify cost/credit usage after metering catches up. If free eligibility cannot be established, do not deploy; retain the tested local outcome and report the unresolved check.
+After deployment, test submission, real SQS processing, DynamoDB persistence, secret-protected tracking and admin updates. Capture actual AWS evidence. Verify cost/credit usage after metering catches up. Do not create resources beyond the approved scope. Current deployed table1RCU/1WCU has about$0.0213/day capacity list cost before allowances; tiny storage/log/queue costs may remain after execution stops.
 
 Cleanup must target only the newly created project resources. Never delete unrelated resources or a table containing the user's data without permission.
 
