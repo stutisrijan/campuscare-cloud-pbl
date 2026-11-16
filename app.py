@@ -32,7 +32,15 @@ class AWSStore:
     def all(self):
         # Deliberately capped for a small teaching demo, not production analytics.
         return self.table.scan(Limit=200).get('Items',[])
-def store(): return AWSStore() if os.getenv('TABLE_NAME') else LocalStore()
+# Build AWS clients once during Lambda initialization, outside the 5-second handler.
+# Reuse their connections on warm invocations; local tests keep isolated stores.
+_AWS_STORE = AWSStore() if os.getenv('TABLE_NAME') else None
+if os.getenv('QUEUE_URL'):
+    import boto3
+    _SQS = boto3.client('sqs')
+else:
+    _SQS = None
+def store(): return _AWS_STORE if _AWS_STORE is not None else LocalStore()
 def admin(headers):
     value = headers.get('authorization','')
     return bool(ADMIN_TOKEN) and hmac.compare_digest(value, 'Bearer '+ADMIN_TOKEN)
@@ -49,8 +57,7 @@ def process(key):
     s.put(item)
 def enqueue(key):
     if os.getenv('QUEUE_URL'):
-        import boto3
-        boto3.client('sqs').send_message(QueueUrl=os.environ['QUEUE_URL'],MessageBody=json.dumps({'id':key}))
+        _SQS.send_message(QueueUrl=os.environ['QUEUE_URL'],MessageBody=json.dumps({'id':key}))
     else: threading.Timer(.6,process,args=(key,)).start()
 def dispatch(method,path,headers,body,query):
     s=store()
